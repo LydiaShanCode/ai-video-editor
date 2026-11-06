@@ -5,6 +5,7 @@ import { assembleTimeline } from "../lib/agents/editor";
 import { draftScript, workshopScript } from "../lib/agents/script";
 import { buildSelects } from "../lib/agents/selects";
 import { inferStyle } from "../lib/agents/style";
+import { formatCaption, wrapCaption } from "../lib/grade";
 import { assertProjectId } from "../lib/ids";
 import type { Asset, Project, StyleProfile } from "../lib/types";
 
@@ -25,6 +26,12 @@ const style: StyleProfile = {
   notes: [],
   sourceAssetIds: ["ast_aaaaaaaaaaaa"],
 };
+
+test("a typed caption keeps every letter", () => {
+  assert.equal(wrapCaption("TEST CAPTION"), "TEST CAPTION");
+  assert.equal(formatCaption("TEST CAPTION", style), "TEST CAPTION");
+  assert.equal(wrapCaption("DON'T RUSH THIS"), "DON'T RUSH THIS");
+});
 
 test("style reads a fast warm reference as rapid", () => {
   const profile = inferStyle([

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PhonePreview } from "@/components/studio/preview";
@@ -23,6 +23,8 @@ export function Studio({ projectId }: { projectId: string }) {
   const [mode, setMode] = useState<"timeline" | "export">("timeline");
   const [safe, setSafe] = useState(true);
   const [draft, setDraft] = useState("");
+  const saveSeq = useRef(0);
+  const saveChain = useRef(Promise.resolve());
 
   useEffect(() => {
     let cancelled = false;
@@ -110,19 +112,28 @@ export function Studio({ projectId }: { projectId: string }) {
     }
   }
 
-  async function persist(patch: object, optimistic: Project) {
+  function persist(patch: object, optimistic: Project) {
+    const seq = ++saveSeq.current;
     setProject(optimistic);
-    const response = await fetch(`/api/projects/${projectId}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(patch),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      setError(data.error || "Couldn't save that change.");
-      return;
-    }
-    setProject(data);
+    saveChain.current = saveChain.current
+      .then(async () => {
+        const response = await fetch(`/api/projects/${projectId}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(patch),
+        });
+        const data = await response.json();
+        if (seq !== saveSeq.current) return;
+        if (!response.ok) {
+          setError(data.error || "Couldn't save that change.");
+          return;
+        }
+        setProject(data);
+      })
+      .catch((reason: unknown) => {
+        if (seq !== saveSeq.current) return;
+        setError(reason instanceof Error ? reason.message : "Couldn't save that change.");
+      });
   }
 
   async function upload(file: File, role: "style" | "footage", description: string) {

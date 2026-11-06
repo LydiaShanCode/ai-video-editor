@@ -60,6 +60,6 @@ export function cssCaption(style: Pick<StyleProfile, "captions" | "captionPositi
       ? "font-serif text-[1.15rem] leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
       : style.captions === "minimal"
         ? "text-xs tracking-[0.16em] text-white/90"
-        : "bg-black/60 px-3 py-2 text-[1.05rem] font-semibold leading-tight tracking-wide text-white";
+        : "bg-black/60 px-2.5 py-1.5 text-[clamp(0.72rem,7cqw,1.05rem)] font-semibold leading-tight text-white";
   return { position, face };
 }

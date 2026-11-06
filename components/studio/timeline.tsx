@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { timecode } from "@/lib/text";
 import type { Project, TimelineClip } from "@/lib/types";
@@ -110,11 +111,7 @@ export function Timeline({
           </label>
           <label className="grid gap-1 text-[11px] text-muted-foreground">
             Caption
-            <input
-              className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground"
-              value={clip.caption}
-              onChange={(event) => onChange(clip.id, { caption: event.target.value })}
-            />
+            <CaptionField key={clip.id} value={clip.caption} onChange={(caption) => onChange(clip.id, { caption })} />
           </label>
           <div className="flex items-end gap-2">
             <button className="text-xs underline-offset-2 hover:underline" onClick={() => onMove(clip.id, -1)}>
@@ -135,5 +132,33 @@ export function Timeline({
         <p className="border-t border-border px-3 py-2 text-xs text-muted-foreground">Select a shot to trim it, rewrite the caption, or lift it.</p>
       )}
     </div>
+  );
+}
+
+function CaptionField({ value, onChange }: { value: string; onChange: (caption: string) => void }) {
+  const [draft, setDraft] = useState(value);
+  const focused = useRef(false);
+
+  useEffect(() => {
+    if (!focused.current) setDraft(value);
+  }, [value]);
+
+  return (
+    <input
+      className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground"
+      value={draft}
+      onFocus={() => {
+        focused.current = true;
+      }}
+      onBlur={() => {
+        focused.current = false;
+        if (draft !== value) onChange(draft);
+      }}
+      onChange={(event) => {
+        const next = event.target.value;
+        setDraft(next);
+        onChange(next);
+      }}
+    />
   );
 }

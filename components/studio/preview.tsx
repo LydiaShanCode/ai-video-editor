@@ -69,7 +69,7 @@ export function PhonePreview({
 
   return (
     <div className="flex min-h-[420px] flex-col items-center justify-center gap-4 bg-[radial-gradient(ellipse_at_center,rgba(255,77,28,0.08),transparent_62%)] px-4 py-6">
-      <div className="relative aspect-[9/16] h-[min(62vh,640px)] overflow-hidden rounded-[1.6rem] border border-border bg-black shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
+      <div className="relative aspect-[9/16] h-[min(62vh,640px)] overflow-hidden rounded-[1.6rem] border border-border bg-black shadow-[0_30px_80px_rgba(0,0,0,0.35)] @container">
         {mode === "export" && render ? (
           <video
             key={render.id}
@@ -93,10 +93,10 @@ export function PhonePreview({
           </div>
         )}
         {mode === "timeline" && caption && look ? (
-          <div className={`pointer-events-none absolute inset-x-6 text-center ${look.position}`}>
-            <p className={look.face}>
-              {caption.split("\n").map((line) => (
-                <span key={line} className="block">
+          <div className={`pointer-events-none absolute inset-x-3 text-center ${look.position}`}>
+            <p className={`${look.face} mx-auto max-w-full whitespace-pre-wrap break-words`}>
+              {caption.split("\n").map((line, index) => (
+                <span key={`${index}-${line}`} className="block">
                   {line}
                 </span>
               ))}
