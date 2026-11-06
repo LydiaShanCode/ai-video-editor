@@ -1,0 +1,44 @@
+{
+  "title": "Morning pour",
+  "brief": "A short film about the ten seconds that make a morning worth getting up for: the pour. Not the gear. Just the sound and the steam.",
+  "platform": "both",
+  "targetDuration": 24,
+  "assets": [
+    {
+      "file": "style-punchy.mp4",
+      "role": "style",
+      "name": "Punchy reference",
+      "description": "Fast creator reference. Hard cuts, warm grade, bold captions, hook in the first second."
+    },
+    {
+      "file": "raw-window.mp4",
+      "role": "footage",
+      "name": "Window",
+      "description": "Wide, slow. Blue morning light on an empty oak table. Almost still. Quiet on purpose."
+    },
+    {
+      "file": "raw-grind.mp4",
+      "role": "footage",
+      "name": "Grind",
+      "description": "Close, rhythmic. The grinder chatters. Hands are a little clumsy. Texture, not the hero."
+    },
+    {
+      "file": "raw-pour.mp4",
+      "role": "footage",
+      "name": "Pour",
+      "description": "The hero. Coffee leaves the kettle in a ribbon. Steam. The best frame is the middle of the pour."
+    },
+    {
+      "file": "raw-sip.mp4",
+      "role": "footage",
+      "name": "Sip",
+      "description": "Payoff. The cup comes up, a pause, a small exhale. End on the cup lowering."
+    },
+    {
+      "file": "raw-counter.mp4",
+      "role": "footage",
+      "name": "Counter",
+      "description": "Accidental recording. The phone sat on the counter. Mostly nothing. One cupboard around eight seconds."
+    }
+  ]
+}
