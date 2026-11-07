@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { gate, JSON_LIMIT } from "@/lib/guard";
 import { assertProjectId } from "@/lib/ids";
 import { runStage, type Stage } from "@/lib/pipeline";
-import { assertSameOrigin, ensureSession, jsonError } from "@/lib/session";
+import { ensureSession, jsonError } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,7 +12,8 @@ const STAGES = new Set<Stage>(["style", "script", "selects", "assemble", "confor
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    assertSameOrigin(request);
+    const denied = await gate(request, JSON_LIMIT);
+    if (denied) return denied;
     const sessionId = await ensureSession();
     const { id } = await params;
     assertProjectId(id);

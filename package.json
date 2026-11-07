@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 4177 -H 0.0.0.0",
+    "dev": "next dev -p 4177",
     "build": "next build",
     "start": "next start -p 4177 -H 0.0.0.0",
     "lint": "eslint",
@@ -19,7 +19,6 @@
     "@radix-ui/react-tooltip": "^1.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "cn": "^0.5.2",
     "ffmpeg-static": "^5.3.0",
     "ffprobe-static": "^3.1.0",
     "lucide-react": "^1.70.0",

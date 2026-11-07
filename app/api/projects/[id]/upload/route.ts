@@ -3,8 +3,10 @@ import os from "node:os";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { attachUpload } from "@/lib/demo";
+import { gate, UPLOAD_LIMIT } from "@/lib/guard";
 import { assertProjectId } from "@/lib/ids";
-import { assertSameOrigin, ensureSession, jsonError } from "@/lib/session";
+import { assertCapacity } from "@/lib/quota";
+import { ensureSession, jsonError } from "@/lib/session";
 import { loadProject, saveProject, withProjectLock } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -17,7 +19,8 @@ const EXTENSIONS = new Set(["mp4", "mov", "m4v", "webm", "mkv"]);
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const scratch = await mkdtemp(path.join(os.tmpdir(), "reelroom-"));
   try {
-    assertSameOrigin(request);
+    const denied = await gate(request, UPLOAD_LIMIT);
+    if (denied) return denied;
     const sessionId = await ensureSession();
     const { id } = await params;
     assertProjectId(id);
@@ -25,6 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const file = form.get("file");
     if (!(file instanceof File)) throw new Error("Choose a video file.");
     if (file.size > MAX_BYTES) throw new Error("Keep each file under 250 MB.");
+    await assertCapacity(sessionId, file.size);
     const ext = (file.name.split(".").pop() || "").toLowerCase();
     if (!EXTENSIONS.has(ext)) throw new Error("Use an MP4, MOV, M4V, WEBM, or MKV.");
     const role = form.get("role") === "style" ? "style" : "footage";

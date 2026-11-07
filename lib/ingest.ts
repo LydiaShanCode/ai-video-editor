@@ -5,6 +5,7 @@ import { probeFile, transcodeToMp4 } from "./video/analyze";
 const MAX_DURATION = 12 * 60;
 
 export async function ingestCopy(tempFile: string, destination: string) {
+  await rejectPlaylist(tempFile);
   const probed = await probeFile(tempFile);
   if (!Number.isFinite(probed.duration) || probed.duration <= 0.2) {
     throw new Error("That clip is too short to cut.");
@@ -17,4 +18,18 @@ export async function ingestCopy(tempFile: string, destination: string) {
   if (friendly) await fs.copyFile(tempFile, destination);
   else await transcodeToMp4(tempFile, destination);
   return probeFile(destination);
+}
+
+export async function rejectPlaylist(file: string) {
+  const handle = await fs.open(file, "r");
+  try {
+    const buffer = Buffer.alloc(256);
+    await handle.read(buffer, 0, buffer.length, 0);
+    const text = buffer.toString("utf8").replace(/^\uFEFF/, "").trimStart().slice(0, 80).toLowerCase();
+    if (text.startsWith("#extm3u") || text.startsWith("#ext-x-") || text.startsWith("http://") || text.startsWith("https://")) {
+      throw new Error("That file isn't a video.");
+    }
+  } finally {
+    await handle.close();
+  }
 }

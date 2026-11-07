@@ -1,6 +1,16 @@
 import { spawn } from "node:child_process";
+import { releaseJob, takeJob } from "../quota";
 
-export function run(bin: string, args: string[], timeoutMs = 120000) {
+export async function run(bin: string, args: string[], timeoutMs = 120000) {
+  await takeJob();
+  try {
+    return await runOnce(bin, args, timeoutMs);
+  } finally {
+    releaseJob();
+  }
+}
+
+function runOnce(bin: string, args: string[], timeoutMs: number) {
   return new Promise<{ stdout: string; stderr: string; code: number }>((resolve, reject) => {
     const child = spawn(bin, args, { stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";

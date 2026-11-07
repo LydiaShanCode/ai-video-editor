@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { gate, JSON_LIMIT } from "@/lib/guard";
 import { assertProjectId } from "@/lib/ids";
 import { applyProjectPatch, type ProjectPatch } from "@/lib/patch";
-import { assertSameOrigin, ensureSession, jsonError } from "@/lib/session";
+import { ensureSession, jsonError } from "@/lib/session";
 import { deleteProject, loadProject, saveProject, withProjectLock } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -22,7 +23,8 @@ export async function GET(_request: Request, { params }: Ctx) {
 
 export async function PATCH(request: Request, { params }: Ctx) {
   try {
-    assertSameOrigin(request);
+    const denied = await gate(request, JSON_LIMIT);
+    if (denied) return denied;
     const sessionId = await ensureSession();
     const { id } = await params;
     assertProjectId(id);
@@ -41,7 +43,8 @@ export async function PATCH(request: Request, { params }: Ctx) {
 
 export async function DELETE(request: Request, { params }: Ctx) {
   try {
-    assertSameOrigin(request);
+    const denied = await gate(request);
+    if (denied) return denied;
     const sessionId = await ensureSession();
     const { id } = await params;
     assertProjectId(id);

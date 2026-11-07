@@ -4,6 +4,8 @@ import { ffmpegPath, ffprobePath } from "./bin";
 import { ffmpegError, run } from "./run";
 import type { AssetMetrics } from "../types";
 
+const LOCAL = ["-protocol_whitelist", "file,crypto,pipe", "-allowed_extensions", "mp4,mov,m4v,webm,mkv,jpg,jpeg,png,aac,wav,m4a"];
+
 export type Probe = {
   duration: number;
   width: number;
@@ -17,6 +19,7 @@ export async function probeFile(file: string): Promise<Probe> {
   const result = await run(ffprobePath(), [
     "-v",
     "error",
+    ...LOCAL,
     "-print_format",
     "json",
     "-show_format",
@@ -25,9 +28,11 @@ export async function probeFile(file: string): Promise<Probe> {
   ]);
   if (result.code !== 0) throw new Error("That file doesn't look like a video.");
   const parsed = JSON.parse(result.stdout) as {
-    format?: { duration?: string };
+    format?: { duration?: string; format_name?: string };
     streams?: { codec_type?: string; codec_name?: string; width?: number; height?: number; avg_frame_rate?: string }[];
   };
+  const format = parsed.format?.format_name ?? "";
+  if (/(^|,)(hls|applehttp|dash)(,|$)/.test(format)) throw new Error("That file isn't a video.");
   const video = parsed.streams?.find((stream) => stream.codec_type === "video");
   if (!video?.width || !video.height) throw new Error("That file doesn't have a picture track.");
   const audio = parsed.streams?.some((stream) => stream.codec_type === "audio") ?? false;
@@ -47,6 +52,7 @@ export async function transcodeToMp4(input: string, output: string) {
     ffmpegPath(),
     [
       "-y",
+      ...LOCAL,
       "-i",
       input,
       "-map",
@@ -80,6 +86,7 @@ export async function transcodeToMp4(input: string, output: string) {
       ffmpegPath(),
       [
         "-y",
+        ...LOCAL,
         "-i",
         input,
         "-map",
@@ -137,6 +144,7 @@ export async function writeThumbs(file: string, directory: string, duration: num
     const output = path.join(directory, `${index}.jpg`);
     const result = await run(ffmpegPath(), [
       "-y",
+      ...LOCAL,
       "-ss",
       at.toFixed(3),
       "-i",
@@ -156,6 +164,7 @@ export async function writeThumbs(file: string, directory: string, duration: num
 async function detectScenes(file: string) {
   const result = await run(ffmpegPath(), [
     "-hide_banner",
+    ...LOCAL,
     "-i",
     file,
     "-filter:v",
@@ -180,6 +189,7 @@ async function detectScenes(file: string) {
 async function detectEnergy(file: string, duration: number) {
   const result = await run(ffmpegPath(), [
     "-hide_banner",
+    ...LOCAL,
     "-i",
     file,
     "-af",
@@ -209,6 +219,7 @@ async function detectEnergy(file: string, duration: number) {
 async function detectColor(file: string) {
   const result = await run(ffmpegPath(), [
     "-hide_banner",
+    ...LOCAL,
     "-i",
     file,
     "-vf",

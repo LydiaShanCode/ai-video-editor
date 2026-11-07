@@ -1,10 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
+import { gate } from "@/lib/guard";
 import { assertAssetId, assertProjectId } from "@/lib/ids";
 import { nowIso, uid } from "@/lib/ids";
 import { mediaPath, projectDir } from "@/lib/paths";
-import { assertSameOrigin, ensureSession, jsonError } from "@/lib/session";
+import { ensureSession, jsonError } from "@/lib/session";
 import { loadProject, saveProject, withProjectLock } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -12,7 +13,8 @@ export const dynamic = "force-dynamic";
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string; assetId: string }> }) {
   try {
-    assertSameOrigin(request);
+    const denied = await gate(request);
+    if (denied) return denied;
     const sessionId = await ensureSession();
     const { id, assetId } = await params;
     assertProjectId(id);

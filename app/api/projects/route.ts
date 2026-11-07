@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { gate, JSON_LIMIT } from "@/lib/guard";
 import { emptyProject } from "@/lib/pipeline";
-import { assertSameOrigin, ensureSession, jsonError } from "@/lib/session";
+import { assertCapacity } from "@/lib/quota";
+import { ensureSession, jsonError } from "@/lib/session";
 import { listProjects, saveProject } from "@/lib/store";
 import type { Platform } from "@/lib/types";
 
@@ -19,8 +21,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    assertSameOrigin(request);
+    const denied = await gate(request, JSON_LIMIT);
+    if (denied) return denied;
     const sessionId = await ensureSession();
+    await assertCapacity(sessionId);
     const existing = await listProjects(sessionId);
     if (existing.length >= 20) throw new Error("Twenty projects is the limit in this browser.");
     const body = (await request.json()) as {

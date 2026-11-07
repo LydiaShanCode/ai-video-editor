@@ -15,6 +15,7 @@ export async function ensureSession() {
   jar.set(COOKIE, id, {
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 60 * 60 * 24 * 400,
   });
@@ -50,7 +51,7 @@ export function jsonError(error: unknown) {
   if (/isn't in this browser|Unknown project|Unknown clip|Unknown export|Unknown cutting|Unknown frame/.test(message)) {
     return NextResponse.json({ error: message }, { status: 404 });
   }
-  const client = /empty|under 12|under 250|look like a video|picture track|Keep each|Nothing to undo|have to exist|Add raw|before pulling|before assembling|before exporting|too short|too large|MP4, MOV|limit|Choose a video|Use an MP4|Unknown stage/.test(message);
+  const client = /empty|under 12|under 250|look like a video|picture track|Keep each|Nothing to undo|have to exist|Add raw|before pulling|before assembling|before exporting|too short|too large|isn't a video|Say how large|cutting room is full|MP4, MOV|limit|Choose a video|Use an MP4|Unknown stage/.test(message);
   if (!client) console.error(error);
   return NextResponse.json({ error: message.slice(0, 400) }, { status: client ? 400 : 500 });
 }

@@ -40,8 +40,12 @@ export async function saveProject(sessionId: string, project: Project) {
 
 export async function listProjects(sessionId: string) {
   const dir = projectsDir(sessionId);
-  await fs.mkdir(dir, { recursive: true });
-  const entries = await fs.readdir(dir, { withFileTypes: true });
+  let entries;
+  try {
+    entries = await fs.readdir(dir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
   const projects: Project[] = [];
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
