@@ -322,8 +322,12 @@ export function Studio({ projectId }: { projectId: string }) {
               void persist({ style }, { ...project, style });
             }}
             onScript={(script: Script) => void persist({ script }, { ...project, script })}
-            onUpload={(file, role, description) => void upload(file, role, description)}
+            onUpload={(file, role, description) => upload(file, role, description)}
             onRemoveAsset={(id) => void removeAsset(id)}
+            onNote={(id, description) => {
+              const assets = project.assets.map((asset) => (asset.id === id ? { ...asset, description } : asset));
+              persist({ assets: [{ id, description }] }, { ...project, assets });
+            }}
             onAddSelect={addSelect}
             onApplyConform={() => void run("conform", { apply: true })}
           />

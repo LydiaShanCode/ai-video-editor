@@ -21,7 +21,7 @@ npm install
 npm run dev
 ```
 
-Open the app and start with **Morning pour**. That project is generated footage, so the whole room can run before your rushes arrive. The dull counter clip should stay out of the cut.
+Open the app and drop a reference plus the raw footage, then open the editor. **Morning pour** is generated footage, so the room can run before your rushes arrive. The dull counter clip should stay out of the cut.
 
 Export is an H.264 MP4, 1080×1920, AAC, aimed at -14 LUFS. Use the same file for Reels and TikTok. Safe-zone guides mark the top, the right rail, and the caption area.
 
